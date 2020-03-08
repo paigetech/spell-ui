@@ -2,39 +2,57 @@ import React, { useState, useContext } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-const blah = {
-  spellSlots: [true, true, false],
+const fetch = [4, 3, 1] // This will be where we grab from the API later
+const spells = {
+  spellSlots: fetch.reverse(),
   setSpellSlots: () => {
     console.log("BOOM!")
   }
 }
-const SpellSlotContext = React.createContext(blah)
+const SpellSlotContext = React.createContext(spells)
 
-function Blah() {
+function Pyramid() {
   const context = useContext(SpellSlotContext)
-  const [gotCheckUpdate, setGotCheckUpdate] = useState('Not yet...')
-  console.log("SPELL SLOTS", context);
-  return(
-    <div style={{marginTop: '10px', border: '1px solid'}}>
-      {context.spellSlots.map((slotFilled, index) => {
-        return <Checkbox checked={slotFilled} key={index}/>
+
+  return (
+    <div style={{margin: '10px', border: '1px solid'}}>
+      {context.spellSlots.map((slots, index) => {
+        return <Row slots={slots} key={index} />
       })}
-      <div>{gotCheckUpdate}</div>
     </div>
   )
 }
 
-function Checkbox(props) {
-  const [isChecked, setIsChecked] = useState(props.checked)
+function Row({ slots }) {
+  const context = useContext(SpellSlotContext)
 
-  return <input type='checkbox' defaultChecked={isChecked}></input>
+  let checkboxes = [];
+  for (let index = 0; index < slots; index++) {
+    checkboxes.push(<Checkbox checked={true} key={index}/>)
+  }
+
+  return(
+    <div style={{marginTop: '10px', border: '1px solid'}}>
+      {checkboxes}
+    </div>
+  )
+}
+
+function Checkbox({ checked }) {
+  const context = useContext(SpellSlotContext)
+
+  function handleChange() {
+    context.setSpellSlots()
+  }
+
+  return <input type='checkbox' defaultChecked={checked} onClick={handleChange}></input>
 }
 
 function App() {
   return (
     <div className="App">
-      <SpellSlotContext.Provider value={blah}>
-        <Blah />
+      <SpellSlotContext.Provider value={spells}>
+        <Pyramid />
       </SpellSlotContext.Provider>
     </div>
   );
