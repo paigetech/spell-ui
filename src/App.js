@@ -5,26 +5,30 @@ import './App.css';
 const SpellSlotContext = React.createContext()
 
 function Pyramid() {
-  const context = useContext(SpellSlotContext)
+  const { spellSlots } = useContext(SpellSlotContext)
   const levelLabels = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth"].reverse();
 
   return (
-    <SpellSlotContext.Consumer>
-      {({ spellSlots }) => (
-        <div style={{margin: '10px'}}>
-        {spellSlots.map((slots, index) => {
-          return <Row slots={slots} label={levelLabels[index]} position={index} key={index} />
-        })}
-        </div>
-      )}
-    </SpellSlotContext.Consumer>
+    <div style={{margin: '10px'}}>
+      {spellSlots.map((slots, index) => {
+        return <Row slots={slots} label={levelLabels[index]} position={index} key={index} />
+      })}
+    </div>
   )
 }
 
 function Row({ slots, label, position }) {
+  const { setSpellSlots } = useContext(SpellSlotContext)
+
   let checkboxes = [];
   for (let index = 0; index < slots; index++) {
-    checkboxes.push(<Checkbox checked={true} key={index} position={position}/>)
+    checkboxes.push(
+      <Checkbox
+        defaultChecked={true}
+        onChange={() => {setSpellSlots(position)}}
+        key={index}
+      />
+    )
   }
 
   return(
@@ -34,28 +38,24 @@ function Row({ slots, label, position }) {
   )
 }
 
-function Checkbox({ checked, position }) {
-  const context = useContext(SpellSlotContext)
-
-  function handleChange() {
-    context.setSpellSlots(position)
-  }
-
-  return <input type='checkbox' defaultChecked={checked} onClick={handleChange}></input>
+function Checkbox(props, { checked }) {
+  return <input type='checkbox' defaultChecked={checked} {...props}></input>
 }
 
 function App() {
   const [spellSlots, setSpellSlots] = useState([4, 3, 2, 1, 0, 0, 0, 0, 0].reverse());
 
   function uncheckSlot (position) {
-    spellSlots[position] = spellSlots[position] - 1
-    console.log(spellSlots);
-    setSpellSlots(spellSlots);
+    let newSpellSlots = [...spellSlots]
+    newSpellSlots[position] = spellSlots[position] - 1
+    setSpellSlots(newSpellSlots);
   }
+
+  const spells = { spellSlots: spellSlots, setSpellSlots: uncheckSlot }
 
   return (
     <div className="App">
-      <SpellSlotContext.Provider value={{ spellSlots: spellSlots, setSpellSlots: uncheckSlot }}>
+      <SpellSlotContext.Provider value={spells}> // TODO: Fix weird unchecked box on re-render
         <Pyramid />
       </SpellSlotContext.Provider>
     </div>
